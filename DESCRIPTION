@@ -19,3 +19,6 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Config/roxygen2/version: 8.1.0
+Remotes:
+    MRCIEU/TwoSampleMR,
+    WSpiller/RadialMR
