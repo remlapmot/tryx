@@ -11,6 +11,10 @@ Description: Heterogeneity in MR analyses can arise due to horizontal
     putative associations, and adjusting for their influences to reduce
     heterogeneity and improve power.
 License: MIT + file LICENSE
+URL: https://mrcieu.r-universe.dev/tryx,
+    https://explodecomputer.github.io/tryx/,
+    https://github.com/explodecomputer/tryx
+BugReports: https://github.com/explodecomputer/tryx/issues
 Depends: 
     R (>= 4.1.0)
 Imports:
