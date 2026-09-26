@@ -7,3 +7,4 @@ mrbase.oauth
 *.rdb
 
 *_cache/
+.DS_Store
