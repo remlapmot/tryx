@@ -207,7 +207,7 @@ tryx.adjustment.mv <- function(tryxscan, lasso=TRUE, id_remove=NULL, proxies=FAL
 #' @param tryxscan Output from \code{tryx.scan}
 #' @param plot Whether to plot or not. Default is TRUE
 #' @param id_remove List of IDs to exclude from the adjustment analysis. It is possible that in the outlier search a candidate trait will come up which is essentially just a surrogate for the outcome trait (e.g. if you are analysing coronary heart disease as the outcome then a variable related to heart disease medication might come up as a candidate trait). Adjusting for a trait which is essentially the same as the outcome will erroneously nullify the result, so visually inspect the candidate trait list and remove those that are inappropriate.
-#' @param duplicate_outliers_method Sometimes more than one trait will associate with a particular outlier. TRUE = only keep the trait that has the biggest influence on heterogeneity
+#' @param filter_duplicate_outliers Sometimes more than one trait will associate with a particular outlier. TRUE = only keep the trait that has the biggest influence on heterogeneity
 #' 
 #' @export
 #' @return List of 
@@ -246,11 +246,6 @@ tryx.analyse <- function(tryxscan, plot=TRUE, id_remove=NULL, filter_duplicate_o
 	# 	analysis$detection <- detection
 	# }
 
-	cpg <- require(ggrepel)
-	if(!cpg)
-	{
-		stop("Please install the ggrepel package\ninstall.packages('ggrepel')")
-	}
 
 	dat <- subset(tryxscan$dat, mr_keep, select=c(SNP, beta.exposure, beta.outcome, se.exposure, se.outcome))
 	dat$ratio <- dat$beta.outcome / dat$beta.exposure
@@ -310,7 +305,7 @@ tryx.analyse <- function(tryxscan, plot=TRUE, id_remove=NULL, filter_duplicate_o
 	# Outliers removed (all)
 	tt <- subset(dat, !SNP %in% tryxscan$outliers)
 	mod <- try(summary(lm(ratiow ~ -1 + weights, data=tt)))
-	if(class(mod) != "try-error")
+	if(!inherits(mod, "try-error"))
 	{
 		estimates <- bind_rows(estimates, 
 			tibble(
@@ -328,7 +323,7 @@ tryx.analyse <- function(tryxscan, plot=TRUE, id_remove=NULL, filter_duplicate_o
 	# Outliers removed (candidates)
 	tt <- subset(dat, !SNP %in% temp$SNP)
 	mod <- try(summary(lm(ratiow ~ -1 + weights, data=tt)))
-	if(class(mod) != "try-error")
+	if(!inherits(mod, "try-error"))
 	{
 		estimates <- bind_rows(estimates, 
 			tibble(
@@ -348,7 +343,7 @@ tryx.analyse <- function(tryxscan, plot=TRUE, id_remove=NULL, filter_duplicate_o
 	tt$qi <- cochrans_q(tt$beta.outcome / tt$beta.exposure, tt$se.outcome / abs(tt$beta.exposure))
 	analysis$Q$adj_Q <- sum(tt$qi)
 	mod <- try(summary(lm(ratiow ~ -1 + weights, data=tt)))
-	if(class(mod) != "try-error")
+	if(!inherits(mod, "try-error"))
 	{
 		estimates <- bind_rows(estimates, 
 			tibble(
@@ -382,7 +377,7 @@ tryx.analyse <- function(tryxscan, plot=TRUE, id_remove=NULL, filter_duplicate_o
 	{
 		tt <- subset(dat, !SNP %in% tryxscan$true_outliers)
 		mod <- try(summary(lm(ratiow ~ -1 + weights, data=tt)))
-		if(class(mod) != "try-error")
+		if(!inherits(mod, "try-error"))
 		{
 			estimates <- bind_rows(estimates,
 				tibble(
@@ -448,26 +443,6 @@ tryx.analyse <- function(tryxscan, plot=TRUE, id_remove=NULL, filter_duplicate_o
 	}
 	return(analysis)
 }
-
-
-
-#' Analyse tryx results
-#' 
-#' This returns various heterogeneity statistics, IVW estimates for raw, 
-#' adjusted and outlier removed datasets, and summary of peripheral 
-#' traits detected etc.
-#' 
-#' @param tryxscan Output from \code{tryx.scan}
-#' @param plot Whether to plot or not. Default is TRUE
-#' @param filter_duplicate_outliers Whether to only allow each putative outlier to be adjusted by a single trait (in order of largest divergence). Default is TRUE.
-#' 
-#' @export
-#' @return List of 
-#' - adj_full: data frame of SNP adjustments for all candidate traits
-#' - adj: The results from adj_full selected to adjust the exposure-outcome model
-#' - Q: Heterogeneity stats
-#' - estimates: Adjusted and unadjested exposure-outcome effects
-#' - plot: Radial plot showing the comparison of different methods and the changes in SNP effects ater adjustment
 
 
 
@@ -597,7 +572,6 @@ bootstrap_path <- function(gx, gx.se, gp, gp.se, px, px.se, nboot=1000)
 
 radialmr <- function(dat, outlier=NULL)
 {
-	library(ggplot2)
 	beta.exposure <- dat$beta.exposure
 	beta.outcome <- dat$beta.outcome
 	se.outcome <- dat$se.outcome

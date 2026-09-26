@@ -25,7 +25,7 @@
 #' @param vgxu2 = 0.2 Variance explained by each gx instrument on each u2 mediator
 #' @param vu2y = 0.2 Variance explained by all u2 mediators on y
 #' @param ngxu3 = 0 Number of gx instruments that pleiotropically associate with u3 mediator
-#' @param vgxu3y = 0 Variance explained by all gx variants directly on u3 mediator
+#' @param vgxu3 = 0 Variance explained by all gx variants directly on u3 mediator
 #' @param mininum_instruments = 10 Minimum number of instruments required to have been detected to run simulation
 #' @param instrument_threshold = "bonferroni" Threshold, either numeric or 'bonferroni'
 #' @param outlier_threshold = "bonferroni" Threshold, either numeric or 'bonferroni'
@@ -36,21 +36,26 @@
 #' @return list for tryx.analyse
 tryx.simulate <- function(nid = 10000, ngx = 30, ngu1 = 30, ngu2 = 30, nu2 = 2, ngu3 = 30, vgx = 0.2, vgu1 = 0.6, vgu2 = 0.2, vgu3 = 0.2, bxy = 0, bu1x = 0.6, bu1y = 0.4, bxu3 = 0.3, bu3y = 0, vgxu2 = 0.2, vu2y = 0.2, ngxu3 = 0, vgxu3=0, mininum_instruments = 10, instrument_threshold = "bonferroni", outlier_threshold = "bonferroni", outliers_known = "detected", directional_bias = FALSE)
 {
+	if(!requireNamespace("simulateGP", quietly=TRUE))
+	{
+		stop("Please install the simulateGP package\nremotes::install_github('explodecomputer/simulateGP')")
+	}
+
 	out <- list()
 
 	message("Generating genetic effects")
 
-	gx <- make_geno(nid, ngx, 0.5)
-	gu1 <- make_geno(nid, ngu1, 0.5)
-	gu2 <- make_geno(nid, ngu2 * nu2, 0.5)
-	gu3 <- make_geno(nid, ngu3, 0.5)
-	u1 <- make_phen(choose_effects(ngu1, vgu1), gu1)
-	x <- make_phen(c(abs(choose_effects(ngx, vgx)), bu1x), cbind(gx, u1))
+	gx <- simulateGP::make_geno(nid, ngx, 0.5)
+	gu1 <- simulateGP::make_geno(nid, ngu1, 0.5)
+	gu2 <- simulateGP::make_geno(nid, ngu2 * nu2, 0.5)
+	gu3 <- simulateGP::make_geno(nid, ngu3, 0.5)
+	u1 <- simulateGP::make_phen(simulateGP::choose_effects(ngu1, vgu1), gu1)
+	x <- simulateGP::make_phen(c(abs(simulateGP::choose_effects(ngx, vgx)), bu1x), cbind(gx, u1))
 	if(ngxu3 > 0)
 	{
-		u3 <- make_phen(c(choose_effects(ngu3, vgu3), bxu3, choose_effects(ngxu3, vgxu3)), cbind(gu3, x, gx[,sample(1:ngx, ngxu3)]))
+		u3 <- simulateGP::make_phen(c(simulateGP::choose_effects(ngu3, vgu3), bxu3, simulateGP::choose_effects(ngxu3, vgxu3)), cbind(gu3, x, gx[,sample(1:ngx, ngxu3)]))
 	} else {
-		u3 <- make_phen(c(choose_effects(ngu3, vgu3), bxu3), cbind(gu3, x))
+		u3 <- simulateGP::make_phen(c(simulateGP::choose_effects(ngu3, vgu3), bxu3), cbind(gu3, x))
 	}
 
 
@@ -63,22 +68,22 @@ tryx.simulate <- function(nid = 10000, ngx = 30, ngu1 = 30, ngu2 = 30, nu2 = 2, 
 	for(i in 1:nu2)
 	{
 		message("SNP ", i, " is pleiotropic")
-		u2[,i] <- make_phen(
-			c(choose_effects(ngu2, vgu2), abs(choose_effects(1, vgxu2))),
+		u2[,i] <- simulateGP::make_phen(
+			c(simulateGP::choose_effects(ngu2, vgu2), abs(simulateGP::choose_effects(1, vgxu2))),
 			cbind(gu2[,((i-1) * ngu2 + 1):(ngu2 * i)], gx[,i])
 		)
 	}
 
 	message("Creating outcome")
 
-	bu2y <- choose_effects(nu2, vu2y)
+	bu2y <- simulateGP::choose_effects(nu2, vu2y)
 
 	if(directional_bias) 
 	{
 		message("U2 bias is directional")
 		bu2y <- abs(bu2y)
 	}
-	y <- make_phen(
+	y <- simulateGP::make_phen(
 		c(bxy, bu3y, bu1y, bu2y),
 		cbind(x, u3, u1, u2)
 	)
@@ -117,7 +122,7 @@ tryx.simulate <- function(nid = 10000, ngx = 30, ngu1 = 30, ngu2 = 30, nu2 = 2, 
 
 	message("Getting instruments")
 
-	out$dat_all <- get_effs(x, y, G, "X", "Y")
+	out$dat_all <- simulateGP::get_effs(x, y, G, "X", "Y")
 	out$dat <- subset(out$dat_all, pval.exposure < instrument_threshold)
 	stopifnot(nrow(out$dat) > mininum_instruments)
 	out$dat$mr_keep <- TRUE
@@ -158,7 +163,7 @@ tryx.simulate <- function(nid = 10000, ngx = 30, ngu1 = 30, ngu2 = 30, nu2 = 2, 
 	} else if(outliers_known %in% c("detected", "all")) {
 		message("Detecting outliers")
 		radial <- RadialMR::ivw_radial(RadialMR::format_radial(out$dat$beta.exposure, out$dat$beta.outcome, out$dat$se.exposure, out$dat$se.outcome, out$dat$SNP), ifelse(outlier_threshold == "bonferroni", 0.05/nrow(out$dat), outlier_threshold), weights=3)
-		if(radial$outliers[1] == "No significant outliers")
+		if(is.character(radial$outliers) && radial$outliers[1] == "No significant outliers")
 		{
 			message("No significant outliers detected")
 			outliers <- as.character(out$dat$SNP[out$dat$SNP %in% invalid])
@@ -190,7 +195,7 @@ tryx.simulate <- function(nid = 10000, ngx = 30, ngu1 = 30, ngu2 = 30, nu2 = 2, 
 	outlier_scan <- list()
 	for(i in 1:ncol(U))
 	{
-		outlier_scan[[colnames(U)[i]]] <- gwas(U[,i], G[,outliers, drop=FALSE])
+		outlier_scan[[colnames(U)[i]]] <- simulateGP::gwas(U[,i], G[,outliers, drop=FALSE])
 		outlier_scan[[colnames(U)[i]]]$SNP <- outliers
 		outlier_scan[[colnames(U)[i]]]$outcome <- colnames(U)[i]
 	}
@@ -220,13 +225,13 @@ tryx.simulate <- function(nid = 10000, ngx = 30, ngu1 = 30, ngu2 = 30, nu2 = 2, 
 	message("Analysing ", length(PHEN), " traits: ", paste(names(PHEN), collapse=","))
 
 	snplist <- sapply(1:length(PHEN), function(x) {
-		subset(gwas(PHEN[[x]], G), pval < instrument_threshold)$snp
+		subset(simulateGP::gwas(PHEN[[x]], G), pval < instrument_threshold)$snp
 	}) %>% unlist() %>% sort %>% unique
 	message("Found ", length(snplist), " unique instruments")
 
 	message("Perform mvmr")
 	out$mvres <- try({
-		mvdat <- make_mvdat(PHEN, y, G[,snplist])
+		mvdat <- simulateGP::make_mvdat(PHEN, y, G[,snplist])
 		mvres <- mv_multiple(mvdat)
 		mvres$result$exposure <- c("x", traitlist)
 		mvres
@@ -241,8 +246,8 @@ tryx.simulate <- function(nid = 10000, ngx = 30, ngu1 = 30, ngu2 = 30, nu2 = 2, 
 	for(i in traitlist)
 	{
 		message(i)
-		ux[[i]] <- get_effs(U[,i], x, G, i, "X") %>% subset(pval.exposure < instrument_threshold)
-		uy[[i]] <- get_effs(U[,i], y, G, i, "Y") %>% subset(pval.exposure < instrument_threshold)
+		ux[[i]] <- simulateGP::get_effs(U[,i], x, G, i, "X") %>% subset(pval.exposure < instrument_threshold)
+		uy[[i]] <- simulateGP::get_effs(U[,i], y, G, i, "Y") %>% subset(pval.exposure < instrument_threshold)
 		if(nrow(ux[[i]]) > 0)
 		{
 			ux[[i]]$effect_allele.exposure <- "A"

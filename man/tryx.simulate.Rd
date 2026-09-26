@@ -68,6 +68,8 @@ tryx.simulate(
 
 \item{ngxu3}{= 0 Number of gx instruments that pleiotropically associate with u3 mediator}
 
+\item{vgxu3}{= 0 Variance explained by all gx variants directly on u3 mediator}
+
 \item{mininum_instruments}{= 10 Minimum number of instruments required to have been detected to run simulation}
 
 \item{instrument_threshold}{= "bonferroni" Threshold, either numeric or 'bonferroni'}
@@ -77,8 +79,6 @@ tryx.simulate(
 \item{outliers_known}{= "detected" Either detected = using radial mr to find heterogeneity outliers; known = adjust for all known invalid instruments; all = adjust for all instruments}
 
 \item{directional_bias}{= FALSE Is the pleiotropic effect randomly centered around 0 (FALSE) or does it have a non-0 mean (TRUE)}
-
-\item{vgxu3y}{= 0 Variance explained by all gx variants directly on u3 mediator}
 }
 \value{
 list for tryx.analyse

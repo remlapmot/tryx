@@ -7,6 +7,7 @@
 #' Perform MR of each of those candidate traits with the original exposure and outcome.
 #' @export
 Tryx <- R6::R6Class("Tryx", list(
+  #' @field output List holding the input data and the results of each analysis step.
   output = list(),
   
   ##########################################################################################################################################################################
@@ -27,6 +28,9 @@ Tryx <- R6::R6Class("Tryx", list(
     invisible(self)
   },
 
+  #' @description
+  #' Print a summary of the analysis status.
+  #' @param ... Unused.
   print = function(...) {
     cat("Tryx analysis of ", self$output$dat$exposure[1], " against ", self$output$dat$outcome[1], "\n")
     cat("Status:\n")
@@ -52,16 +56,6 @@ Tryx <- R6::R6Class("Tryx", list(
     if(outliers[1] == "RadialMR")
     {
       message("Using RadialMR package to detect outliers")
-      cpg <- require(RadialMR)
-      if(!cpg)
-      {
-        stop("Please install the RadialMR package\ndevtools::install_github('WSpiller/RadialMR')")
-      }
-      cpg <- require(dplyr)
-      if(!cpg)
-      {
-        stop("Please install the RadialMR package\ndevtools::install_github('WSpiller/RadialMR')")
-      }
       
       radialor <- RadialMR::ivw_radial(RadialMR::format_radial(dat$beta.exposure, dat$beta.outcome, dat$se.exposure, dat$se.outcome, dat$SNP), alpha=1, weights=3)
       
@@ -73,7 +67,7 @@ Tryx <- R6::R6Class("Tryx", list(
       rownames(radial$outliers) <- 1:nrow(radial$outliers)
       
       # apply outlier_correction method with outlier_threshold to radial SNP-Q statistics
-      if(radial$outliers[1] == "No significant outliers")
+      if(is.character(radial$outliers) && radial$outliers[1] == "No significant outliers")
       {
         message("No outliers found")
         message("Try changing the outlier_threshold parameter")
@@ -689,7 +683,7 @@ Tryx <- R6::R6Class("Tryx", list(
   #' 
   #' @param id_remove List of IDs to exclude from the adjustment analysis. It is possible that in the outlier search a candidate trait will come up which is essentially just a surrogate for the outcome trait (e.g. if you are analysing coronary heart disease as the outcome then a variable related to heart disease medication might come up as a candidate trait). Adjusting for a trait which is essentially the same as the outcome will erroneously nullify the result, so visually inspect the candidate trait list and remove those that are inappropriate.
   #' 
-  #' @param duplicate_outliers_method Sometimes more than one trait will associate with a particular outlier. TRUE = only keep the trait that has the biggest influence on heterogeneity.
+  #' @param filter_duplicate_outliers Sometimes more than one trait will associate with a particular outlier. TRUE = only keep the trait that has the biggest influence on heterogeneity.
   analyse = function(tryxscan=self$output, plot=TRUE, id_remove=NULL, filter_duplicate_outliers=TRUE) {
     
     analysis <- list()
@@ -709,11 +703,6 @@ Tryx <- R6::R6Class("Tryx", list(
     analysis$adj <- adj
     
     
-    cpg <- require(ggrepel)
-    if(!cpg)
-    {
-      stop("Please install the ggrepel package\ninstall.packages('ggrepel')")
-    }
     
     dat <- subset(tryxscan$dat, mr_keep, select=c(SNP, beta.exposure, beta.outcome, se.exposure, se.outcome))
     dat$ratio <- dat$beta.outcome / dat$beta.exposure
@@ -773,7 +762,7 @@ Tryx <- R6::R6Class("Tryx", list(
     # Outliers removed (all)
     tt <- subset(dat, !SNP %in% tryxscan$outliers)
     mod <- try(summary(lm(ratiow ~ -1 + weights, data=tt)))
-    if(class(mod) != "try-error")
+    if(!inherits(mod, "try-error"))
     {
       estimates <- bind_rows(estimates, 
                              tibble(
@@ -791,7 +780,7 @@ Tryx <- R6::R6Class("Tryx", list(
     # Outliers removed (candidates)
     tt <- subset(dat, !SNP %in% temp$SNP)
     mod <- try(summary(lm(ratiow ~ -1 + weights, data=tt)))
-    if(class(mod) != "try-error")
+    if(!inherits(mod, "try-error"))
     {
       estimates <- bind_rows(estimates, 
                              tibble(
@@ -811,7 +800,7 @@ Tryx <- R6::R6Class("Tryx", list(
     tt$qi <- private$cochrans_q(tt$beta.outcome / tt$beta.exposure, tt$se.outcome / abs(tt$beta.exposure))
     analysis$Q$adj_Q <- sum(tt$qi)
     mod <- try(summary(lm(ratiow ~ -1 + weights, data=tt)))
-    if(class(mod) != "try-error")
+    if(!inherits(mod, "try-error"))
     {
       estimates <- bind_rows(estimates, 
                              tibble(
@@ -845,7 +834,7 @@ Tryx <- R6::R6Class("Tryx", list(
     {
       tt <- subset(dat, !SNP %in% tryxscan$true_outliers)
       mod <- try(summary(lm(ratiow ~ -1 + weights, data=tt)))
-      if(class(mod) != "try-error")
+      if(!inherits(mod, "try-error"))
       {
         estimates <- bind_rows(estimates,
                                tibble(
@@ -903,6 +892,8 @@ Tryx <- R6::R6Class("Tryx", list(
   #' @param lasso Whether to shrink the estimates of each trait within SNP. Default=TRUE.
   #' 
   #' @param proxies Look for proxies in the MVMR methods. Default = FALSE.
+  #' 
+  #' @param plot Whether to plot or not. Default is TRUE.
   analyse.mv = function(tryxscan=self$output, lasso=TRUE, plot=TRUE, id_remove=NULL, proxies=FALSE) {
     x$adjustment.mv(tryxscan=self$output, lasso=lasso, id_remove=id_remove, proxies=proxies)
     adj <- tryxscan$adjustment.mv
@@ -989,16 +980,6 @@ Tryx <- R6::R6Class("Tryx", list(
 #' @param label Display the names of the traits on the graph.
    manhattan_plot = function(what="outcome", id_remove=NULL, y_scale=NULL, label = TRUE){
       
-      cpg <- require(ggplot2)
-      if(!cpg)
-      {
-        stop("Please install the ggplot2 package")
-      }
-      cpg <- require(ggrepel)
-      if(!cpg)
-      {
-        stop("Please install the ggrepel package")
-      }
       
       #Open & clean data
       #mr outcome: candidate traits-outcome / candidate traits-exposure / exposure-candidate traits

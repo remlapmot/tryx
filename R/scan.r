@@ -56,16 +56,6 @@ tryx.scan <- function(dat, outliers="RadialMR", outlier_correction="none", outli
 	if(outliers[1] == "RadialMR")
 	{
 		message("Using RadialMR package to detect outliers")
-		cpg <- require(RadialMR)
-		if(!cpg)
-		{
-			stop("Please install the RadialMR package\ndevtools::install_github('WSpiller/RadialMR')")
-		}
-		cpg <- require(dplyr)
-		if(!cpg)
-		{
-			stop("Please install the RadialMR package\ndevtools::install_github('WSpiller/RadialMR')")
-		}
 
 
 		# radial <- RadialMR::ivw_radial(RadialMR::format_radial(dat$beta.exposure, dat$beta.outcome, dat$se.exposure, dat$se.outcome, dat$SNP), alpha=0.05/nrow(dat), weights=3)
@@ -82,7 +72,7 @@ tryx.scan <- function(dat, outliers="RadialMR", outlier_correction="none", outli
 		# apply outlier_correction method with outlier_threshold to radial SNP-Q statistics
 
 
-		if(radial$outliers[1] == "No significant outliers")
+		if(is.character(radial$outliers) && radial$outliers[1] == "No significant outliers")
 		{
 			message("No outliers found")
 			message("Try changing the outlier_threshold parameter")
@@ -318,6 +308,7 @@ strategy1 <- function(dat, het_threshold=0.05, ivw_max_snp=1)
 
 #' Identify putatively significant associations in the outlier scan
 #' 
+#' @param tryxscan Output from \code{tryx.scan}
 #' @param mr_threshold_method This is the argument to be passed to \code{p.adjust}. Default is "fdr". If no p-value adjustment is to be applied then specify "unadjusted"
 #' @param mr_threshold Threshold to declare significance
 #' @export

@@ -10,3 +10,63 @@ export(tryx.scan)
 export(tryx.sig)
 export(tryx.simulate)
 export(volcano_plot)
+importFrom(R6,R6Class)
+importFrom(TwoSampleMR,
+  available_outcomes,
+  extract_instruments,
+  extract_outcome_data,
+  harmonise_data,
+  mr,
+  mr_heterogeneity,
+  mr_method_list,
+  mv_extract_exposures,
+  mv_harmonise_data,
+  mv_multiple
+)
+importFrom(dplyr,
+  arrange,
+  bind_rows,
+  desc,
+  do,
+  filter,
+  group_by,
+  mutate,
+  n,
+  summarise
+)
+importFrom(ggplot2,
+  aes,
+  arrow,
+  element_blank,
+  element_text,
+  facet_grid,
+  geom_abline,
+  geom_errorbarh,
+  geom_point,
+  geom_segment,
+  geom_vline,
+  ggplot,
+  labs,
+  scale_colour_brewer,
+  theme,
+  theme_bw,
+  unit,
+  xlim,
+  ylim
+)
+importFrom(ggrepel,geom_label_repel)
+importFrom(magrittr,
+  "%$%",
+  "%>%"
+)
+importFrom(stats,
+  as.formula,
+  coef,
+  coefficients,
+  lm,
+  p.adjust,
+  rnorm,
+  sd
+)
+importFrom(tibble,tibble)
+importFrom(utils,combn)

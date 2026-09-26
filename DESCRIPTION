@@ -12,14 +12,20 @@ Imports:
          tidyr,
          ggplot2,
          glmnet,
-         ggrepel
+         ggrepel,
+         R6,
+         tibble
 Suggests: 
     igraph,
+    knitr,
+    rmarkdown,
+    simulateGP,
     testthat
+VignetteBuilder: knitr
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Config/roxygen2/version: 8.1.0
 Remotes:
     MRCIEU/TwoSampleMR,
-    WSpiller/RadialMR
+    WSpiller/RadialMR,
+    explodecomputer/simulateGP

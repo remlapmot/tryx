@@ -66,7 +66,6 @@ Tryx$set("private", "bootstrap_path", function(gx, gx.se, gp, gp.se, px, px.se, 
 
 
 Tryx$set("private", "radialmr", function(dat, outlier=NULL) {
-  library(ggplot2)
   beta.exposure <- dat$beta.exposure
   beta.outcome <- dat$beta.outcome
   se.outcome <- dat$se.outcome

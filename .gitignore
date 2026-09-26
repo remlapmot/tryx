@@ -6,3 +6,4 @@ mrbase.oauth
 *.rdx
 *.rdb
 
+*_cache/

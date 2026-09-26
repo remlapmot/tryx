@@ -9,6 +9,13 @@ Using a summary set, find outliers in the MR analysis between the pair of trais.
 Find other 'candidate traits' associated with those outliers.
 Perform MR of each of those candidate traits with the original exposure and outcome.
 }
+\section{Public fields}{
+  \if{html}{\out{<div class="r6-fields">}}
+  \describe{
+    \item{\code{output}}{List holding the input data and the results of each analysis step.}
+  }
+  \if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
   \itemize{
@@ -60,9 +67,17 @@ Perform MR of each of those candidate traits with the original exposure and outc
 \if{html}{\out{<a id="method-Tryx-print"></a>}}
 \if{latex}{\out{\hypertarget{method-Tryx-print}{}}}
 \subsection{\code{Tryx$print()}}{
+  Print a summary of the analysis status.
   \subsection{Usage}{
     \if{html}{\out{<div class="r">}}
     \preformatted{Tryx$print(...)}
+    \if{html}{\out{</div>}}
+  }
+  \subsection{Arguments}{
+    \if{html}{\out{<div class="arguments">}}
+    \describe{
+      \item{\code{...}}{Unused.}
+    }
     \if{html}{\out{</div>}}
   }
 }
@@ -496,7 +511,7 @@ Perform MR of each of those candidate traits with the original exposure and outc
       \item{\code{tryxscan}}{Output from \code{x$scan()}.}
       \item{\code{plot}}{Whether to plot or not. Default is TRUE.}
       \item{\code{id_remove}}{List of IDs to exclude from the adjustment analysis. It is possible that in the outlier search a candidate trait will come up which is essentially just a surrogate for the outcome trait (e.g. if you are analysing coronary heart disease as the outcome then a variable related to heart disease medication might come up as a candidate trait). Adjusting for a trait which is essentially the same as the outcome will erroneously nullify the result, so visually inspect the candidate trait list and remove those that are inappropriate.}
-      \item{\code{duplicate_outliers_method}}{Sometimes more than one trait will associate with a particular outlier. TRUE = only keep the trait that has the biggest influence on heterogeneity.}
+      \item{\code{filter_duplicate_outliers}}{Sometimes more than one trait will associate with a particular outlier. TRUE = only keep the trait that has the biggest influence on heterogeneity.}
     }
     \if{html}{\out{</div>}}
   }
@@ -523,6 +538,7 @@ Perform MR of each of those candidate traits with the original exposure and outc
     \describe{
       \item{\code{tryxscan}}{Output from \code{x$scan()}}
       \item{\code{lasso}}{Whether to shrink the estimates of each trait within SNP. Default=TRUE.}
+      \item{\code{plot}}{Whether to plot or not. Default is TRUE.}
       \item{\code{id_remove}}{List of IDs to exclude from the adjustment analysis. It is possible that in the outlier search a candidate trait will come up which is essentially just a surrogate for the outcome trait (e.g. if you are analysing coronary heart disease as the outcome then a variable related to heart disease medication might come up as a candidate trait). Adjusting for a trait which is essentially the same as the outcome will erroneously nullify the result, so visually inspect the candidate trait list and remove those that are inappropriate.}
       \item{\code{proxies}}{Look for proxies in the MVMR methods. Default = FALSE.}
     }

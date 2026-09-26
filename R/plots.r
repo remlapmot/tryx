@@ -6,17 +6,6 @@
 #' @return ggplot of volcano plots
 volcano_plot <- function(res, what="exposure")
 {
-	cpg <- require(ggplot2)
-	if(!cpg)
-	{
-		stop("Please install the ggplot2 package")
-	}
-	cpg <- require(ggrepel)
-	if(!cpg)
-	{
-		stop("Please install the ggrepel package")
-	}
-
 	stopifnot(all(c("outcome", "exposure", "b", "se", "pval") %in% names(res)))
 	if(!"sig" %in% names(res))
 	{
@@ -44,7 +33,7 @@ volcano_plot <- function(res, what="exposure")
 	geom_vline(xintercept=0, linetype="dotted") +
 	geom_errorbarh(aes(xmin=b-1.96*se, xmax=b+1.96*se)) +
 	geom_point(aes(colour=sig)) +
-	facet_grid(form, scale="free") +
+	facet_grid(form, scales="free") +
 	geom_label_repel(data=subset(res, sig), aes(label=exposure), colour="black", segment.colour="black", point.padding = unit(0.7, "lines"), box.padding = unit(0.7, "lines"), segment.size=0.5, force=2, max.iter=3e3) +
 	# geom_text_repel(data=subset(res, sig), aes(label=outcome, colour=category)) +
 	geom_point(aes(colour=sig)) +
@@ -69,15 +58,9 @@ volcano_plot <- function(res, what="exposure")
 tryx.network <- function(tryxscan)
 {
 
-	a <- require(igraph)
-	if(!a)
+	if(!requireNamespace("igraph", quietly=TRUE))
 	{
 		stop("Please install the igraph R package")
-	}
-	a <- require(dplyr)
-	if(!a)
-	{
-		stop("Please install the dplyr R package")
 	}
 
 	stopifnot("candidate_outcome_mr" %in% names(tryxscan))
@@ -174,14 +157,14 @@ tryx.network <- function(tryxscan)
 
 
 	nodes <- rbind(
-		data_frame(
+		tibble(
 			name=c(
 				ao$trait[ao$id %in% tryxscan$dat$id.exposure[1]],
 				ao$trait[ao$id %in% tryxscan$dat$id.outcome[1]]),
 			id=c(tryxscan$dat$id.exposure[1], tryxscan$dat$id.outcome[1]),
 			what=c("original")
 		),
-		data_frame(
+		tibble(
 			name=unique(tryxscan$outliers),
 			id=NA,
 			what="Outlier instruments"
@@ -230,20 +213,20 @@ tryx.network <- function(tryxscan)
 	grp$size <- 0.1
 	grp$size[grp$what == "Main hypothesis"] <- 0.5
 
-	layoutg <- graph_from_data_frame(layoutd2, vertices=nodes)
-	l <- layout_with_fr(layoutg)
-	grl <- graph_from_data_frame(grp, directed=TRUE, vertices=nodes)
+	layoutg <- igraph::graph_from_data_frame(layoutd2, vertices=nodes)
+	l <- igraph::layout_with_fr(layoutg)
+	grl <- igraph::graph_from_data_frame(grp, directed=TRUE, vertices=nodes)
 	plot(grl, 
 		layout=l, 
-		vertex.size=V(grl)$size, 
-		vertex.label=V(grl)$label,
-		# edge.arrow.size=E(grl)$size, 
+		vertex.size=igraph::V(grl)$size, 
+		vertex.label=igraph::V(grl)$label,
+		# edge.arrow.size=igraph::E(grl)$size, 
 		edge.arrow.size=0.3,
-		edge.color=E(grl)$colour,
+		edge.color=igraph::E(grl)$colour,
 		vertex.label.cex=0.5, 
 		vertex.label.family="sans", 
 		vertex.label.color="black", 
-		vertex.color=V(grl)$colour,
+		vertex.color=igraph::V(grl)$colour,
 		edge.color="red"
 	)
 }

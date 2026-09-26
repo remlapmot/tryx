@@ -7,6 +7,8 @@
 tryx.sig(tryxscan, mr_threshold_method = "fdr", mr_threshold = 0.05)
 }
 \arguments{
+\item{tryxscan}{Output from \code{tryx.scan}}
+
 \item{mr_threshold_method}{This is the argument to be passed to \code{p.adjust}. Default is "fdr". If no p-value adjustment is to be applied then specify "unadjusted"}
 
 \item{mr_threshold}{Threshold to declare significance}
