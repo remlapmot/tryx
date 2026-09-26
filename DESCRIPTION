@@ -1,31 +1,40 @@
 Package: tryx
 Title: MR-TRYX (treasure your exceptions)
 Version: 0.2.1
-Authors@R: c(person("Gibran", "Hemani", email = "g.hemani@bristol.ac.uk", role = c("aut", "cre")), person("Yoonsu", "Cho", email = "yoonsu.cho@bristol.ac.uk", role = c("aut")))
-Description: Heterogeneity in MR analyses can arise due to horizontal pleiotropy. This package uses MR-Base to identify possible traits that can explain the heterogeneity, with a view to identifying novel putative associations, and adjusting for their influences to reduce heterogeneity and improve power.
-Depends: R (>= 3.6.0)
+Authors@R: c(
+    person("Gibran", "Hemani", , "g.hemani@bristol.ac.uk", role = c("aut", "cre")),
+    person("Yoonsu", "Cho", , "yoonsu.cho@bristol.ac.uk", role = "aut")
+  )
+Description: Heterogeneity in MR analyses can arise due to horizontal
+    pleiotropy. This package uses MR-Base to identify possible traits that
+    can explain the heterogeneity, with a view to identifying novel
+    putative associations, and adjusting for their influences to reduce
+    heterogeneity and improve power.
+License: MIT + file LICENSE
+Depends: 
+    R (>= 3.6.0)
 Imports:
-         TwoSampleMR, 
-         dplyr,
-         RadialMR,
-         magrittr,
-         tidyr,
-         ggplot2,
-         glmnet,
-         ggrepel,
-         R6,
-         tibble
+    dplyr,
+    ggplot2,
+    ggrepel,
+    glmnet,
+    magrittr,
+    R6,
+    RadialMR,
+    tibble,
+    tidyr,
+    TwoSampleMR
 Suggests: 
     igraph,
     knitr,
     rmarkdown,
     simulateGP,
     testthat
-VignetteBuilder: knitr
-License: MIT + file LICENSE
-Encoding: UTF-8
-Config/roxygen2/version: 8.1.0
+VignetteBuilder: 
+    knitr
 Remotes:
+    explodecomputer/simulateGP,
     MRCIEU/TwoSampleMR,
-    WSpiller/RadialMR,
-    explodecomputer/simulateGP
+    WSpiller/RadialMR
+Config/roxygen2/version: 8.1.0
+Encoding: UTF-8
