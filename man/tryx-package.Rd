@@ -8,6 +8,16 @@
 \description{
 Heterogeneity in MR analyses can arise due to horizontal pleiotropy. This package uses MR-Base to identify possible traits that can explain the heterogeneity, with a view to identifying novel putative associations, and adjusting for their influences to reduce heterogeneity and improve power.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://mrcieu.r-universe.dev/tryx}
+  \item \url{https://explodecomputer.github.io/tryx/}
+  \item \url{https://github.com/explodecomputer/tryx}
+  \item Report bugs at \url{https://github.com/explodecomputer/tryx/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Gibran Hemani \email{g.hemani@bristol.ac.uk}
 
